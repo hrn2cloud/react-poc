@@ -1,6 +1,8 @@
 import { Picker } from '@react-native-picker/picker';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../../components/AuthContext';
 import storesConfig from '../../constants/stores.config.json';
 
 const stores: Store[] = storesConfig;
@@ -39,7 +41,17 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedState, setSelectedState] = useState<string>('');
-  
+  const { user } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!user) {
+      setTimeout(() => {
+        router.replace('/login');
+      }, 0);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!selectedStore) return;
     setLoading(true);
@@ -74,26 +86,26 @@ export default function HomeScreen() {
     });
     
     return (
-      <View style={styles.orderContainer}>
-        <Text style={styles.orderTitle}>Order ID: {item.id}</Text>
-        <Text>Title: {item.title}</Text>
-        <Text>Total: ${(item.total / 100).toFixed(2)}</Text>
-        <Text>Payment State: {item.paymentState}</Text>
-        <Text>Note: {item.note}</Text>
+    <View style={styles.orderContainer}>
+      <Text style={styles.orderTitle}>Order ID: {item.id}</Text>
+      <Text>Title: {item.title}</Text>
+      <Text>Total: ${(item.total / 100).toFixed(2)}</Text>
+      <Text>Payment State: {item.paymentState}</Text>
+      <Text>Note: {item.note}</Text>
         <Text>Created Date: {createdDisplay}</Text>
-        <Text style={styles.lineItemsHeader}>Line Items:</Text>
-        <View style={styles.lineItemHeaderRow}>
-          <Text style={styles.headerCell}>Name</Text>
-          <Text style={styles.headerCell}>Price</Text>
-          <Text style={styles.headerCell}>Printed</Text>
-        </View>
-        <FlatList
-          data={item.lineItems?.elements || []}
-          keyExtractor={(li) => li.id}
-          renderItem={renderLineItem}
-        />
+      <Text style={styles.lineItemsHeader}>Line Items:</Text>
+      <View style={styles.lineItemHeaderRow}>
+        <Text style={styles.headerCell}>Name</Text>
+        <Text style={styles.headerCell}>Price</Text>
+        <Text style={styles.headerCell}>Printed</Text>
       </View>
-    );
+      <FlatList
+        data={item.lineItems?.elements || []}
+        keyExtractor={(li) => li.id}
+        renderItem={renderLineItem}
+      />
+    </View>
+  );
   };
 
   return (
